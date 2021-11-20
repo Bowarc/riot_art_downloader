@@ -116,7 +116,6 @@ fn ask_input() -> String{
     user_input
 }
 
-
 #[tokio::main]
 async fn main() {
     let last_ddragon_version: String = get_ddragon_version().await;
@@ -141,7 +140,7 @@ async fn main() {
         let champion = detailled_champion.data.get(champ_name).unwrap().clone();
 
         for (_index, skin) in champion.skins.iter().enumerate(){
-            println!("{}\n", skin.name);
+            println!("{}", skin.name);
 
             let skin_url = CHAMPION_SKIN_URL
                 .replace("%CHAMPION%", champ_name)
@@ -153,9 +152,10 @@ async fn main() {
 
             let img  = image::load_from_memory(&image_buffer).unwrap();
 
-            let path = format!("img/{}_{}.png", champ_name, skin.name);
+            let path = format!("img/{}_{}.png", champ_name, skin.num);
 
             img.save(path).unwrap();
         }
+        println!("\n");
     }
 }
