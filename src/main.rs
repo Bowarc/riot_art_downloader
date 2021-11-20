@@ -11,8 +11,8 @@ const CHAMPION_DATA_URL: &str = "https://ddragon.leagueoflegends.com/cdn/%VERSIO
 const LANGUAGE_URL: &str = "https://ddragon.leagueoflegends.com/cdn/languages.json";
 const CHAMPION_LIST_URL:&str = "https://ddragon.leagueoflegends.com/cdn/%VERSION%/data/%LANGUAGE%/champion.json";
 
-fn getClosestMatch(input: String, data: Vec<String>) -> String{
-    fn newBestMatch(score: isize, name: &str) -> (isize, String) {
+fn get_closest_match(input: String, data: Vec<String>) -> String{
+    fn new_best_match(score: isize, name: &str) -> (isize, String) {
         (score, name.to_string())
     }
 
@@ -27,13 +27,13 @@ fn getClosestMatch(input: String, data: Vec<String>) -> String{
             Some(r) => {
                 let score = r.score();
                 if score > best_match.0{
-                    best_match = newBestMatch(score, i)
+                    best_match = new_best_match(score, i)
                 }
             },
             None => ()
         }
         if input == i.to_lowercase(){
-            best_match = newBestMatch(-1, i);
+            best_match = new_best_match(-1, i);
 
             break
         }
@@ -43,7 +43,7 @@ fn getClosestMatch(input: String, data: Vec<String>) -> String{
     best_match.1
 }
 
-async fn requestByURL(url: &str) -> String{
+async fn request_by_url(url: &str) -> String{
     let r: reqwest::Response = reqwest::get(url).await.expect(&format!("Couldn't get a response for the given url: \n {}.", url));
 
     if r.status() != 200{
@@ -57,7 +57,7 @@ async fn requestByURL(url: &str) -> String{
 }
 
 async fn get_ddragon_version() -> String{
-    let version_data: String = requestByURL(DDRAGON_VERSION_URL).await;
+    let version_data: String = request_by_url(DDRAGON_VERSION_URL).await;
     let version_list: Vec<String> = serde_json::from_str(&version_data).expect(&format!("Couldn't transfrom version data to vec of string."));
 
     // self.ddragon_latest_version = version_list[0].clone();
@@ -68,7 +68,7 @@ async fn get_ddragon_version() -> String{
 }
 
 async fn get_language_list() -> Vec<String> {
-    let languages_data: String = requestByURL(LANGUAGE_URL).await;
+    let languages_data: String = request_by_url(LANGUAGE_URL).await;
     let language_list: Vec<String> = serde_json::from_str(&languages_data).expect(&format!("Couldn't create a json object form the response's text."));
 
     language_list
@@ -90,7 +90,7 @@ async fn ask_language(language_list: Vec<String>) -> String {
 
             let user_input = ask_input();
 
-            let closest_match = getClosestMatch(user_input, language_list.clone());
+            let closest_match = get_closest_match(user_input, language_list.clone());
             if closest_match == String::new(){
                 println!("Failes to recognise the selected_language.");
             }else{
@@ -104,7 +104,7 @@ async fn ask_language(language_list: Vec<String>) -> String {
 async fn get_champion_list(selected_language: String, ddragon_version: String) ->  champion::ChampionList{
     let url = CHAMPION_LIST_URL.replace("%LANGUAGE%", &selected_language).replace("%VERSION%", &ddragon_version);
 
-    let champion_data: String = requestByURL(&url).await;
+    let champion_data: String = request_by_url(&url).await;
 
     let champion_list: champion::ChampionList = serde_json::from_str(&champion_data).unwrap();
     
@@ -149,5 +149,5 @@ async fn main() {
 //         .replace("%LANGUAGE%", &selected_language)
 //         .replace("%VERSION%", &last_ddragon_version);
 //     println!("url: {}", url);
-//     // let skin_list = requestByURL(&url).await;
+//     // let skin_list = request_by_url(&url).await;
 // }
