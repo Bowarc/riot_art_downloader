@@ -1,6 +1,6 @@
 use sublime_fuzzy::{FuzzySearch, Scoring};
 use colored::Colorize;
-use std::io;
+use std::{io, env};
 use image;
 
 mod champion;
@@ -103,7 +103,6 @@ async fn get_champion_list(selected_language: String, ddragon_version: String) -
     let champion_list: champion::ChampionList = serde_json::from_str(&champion_data).unwrap();
     
     champion_list
-
 }
 
 fn ask_input() -> String{
@@ -118,6 +117,13 @@ fn ask_input() -> String{
 
 #[tokio::main]
 async fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2{
+        println!("Not enought arguments, please input the output directory name");
+        std::process::exit(1)
+    }
+    let dir_path = &args[1];
+    println!("Output directory: {}", dir_path);
     let last_ddragon_version: String = get_ddragon_version().await;
 
     let selected_language: String = ask_language(get_language_list().await).await;
@@ -152,7 +158,7 @@ async fn main() {
 
             let img  = image::load_from_memory(&image_buffer).unwrap();
 
-            let path = format!("img/{}_{}.png", champ_name, skin.num);
+            let path = format!("{}/{}_{}.png", dir_path, champ_name, skin.num);
 
             img.save(path).unwrap();
         }
